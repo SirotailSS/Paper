@@ -43,7 +43,7 @@
             font-weight: 600;
             color: #1e293b;
         }
-        /* 表格样式覆盖（与全局一致） */
+        /* 表格样式与全局一致 */
         .table-wrap table {
             min-width: 400px;
         }
@@ -61,22 +61,28 @@
 </head>
 <body>
 
-    <!-- ===== 顶部导航 ===== -->
+    <!-- ==================== 顶部导航 ==================== -->
     <header>
         <div class="container header-inner">
             <div class="logo">
                 <a href="/">白尾 Sirotail</a>
-                <span class="logo-tag">工程师 · 画家</span>
+                <span class="logo-tag">工程师 · 艺术家</span>
             </div>
             <nav>
                 <a href="/" class="btn-home">🏠 首页</a>
+                <a href="#abstract">摘要</a>
+                <a href="#introduction">引言</a>
+                <a href="#design-parameters">设计参数</a>
+                <a href="#modeling-method">建模方法</a>
+                <a href="#conclusion">结论</a>
+                <a href="#references">参考文献</a>
                 <a href="/about.html">关于</a>
                 <a href="/contact.html">联系</a>
             </nav>
         </div>
     </header>
 
-    <!-- ===== 主内容 ===== -->
+    <!-- ==================== 主内容 ==================== -->
     <main class="container">
 
         <!-- 返回链接 -->
@@ -90,7 +96,7 @@
         <hr />
 
         <!-- ===== 摘要 ===== -->
-        <section>
+        <section id="abstract">
             <h2>摘要</h2>
             <p>针对椭圆齿轮副的应用需求，以及在缺乏二次开发能力的情况下，提出了一种生成椭圆齿轮三维数学模型的方法。该方法可在仅使用基础模块的 CAD 软件 CATIA 中实现。首先，给出了椭圆齿轮副的基本公式以及常见设计流程中的设计参数。其次，提供了一个数值实例，以实际方式展示设计输入与输出。最后，提出了一种逐步生成 CATIA 三维数学模型的方法。该方法可帮助工程师在工程实践中方便地应用椭圆齿轮副。</p>
             <p><span class="keyword">关键词：</span>椭圆齿轮，节曲线，CAD，参数化设计，CATIA</p>
@@ -99,7 +105,7 @@
         <hr />
 
         <!-- ===== 引言 ===== -->
-        <section>
+        <section id="introduction">
             <h2>引言</h2>
             <p>在汽车空调模块中，通常采用运动学连杆和连杆系统（即“机构”）来驱动风门 [1]。特别常见的是，空调模块中采用两个温度风门来调节温度，一个控制热风，另一个控制冷风。在传统机构设计中，采用多连杆或齿轮副来连接两个风门，并由一个执行器驱动。与传统设计不同，椭圆齿轮副具有可变传动比，在此应用中可以改善空调的温度线性度性能。</p>
 
@@ -110,8 +116,8 @@
 
         <hr />
 
-        <!-- ===== 第2章 ===== -->
-        <section>
+        <!-- ===== 椭圆齿轮的设计参数 ===== -->
+        <section id="design-parameters">
             <h2>椭圆齿轮的设计参数</h2>
             <p>椭圆齿轮的节曲线可用极坐标表示为：</p>
 
@@ -463,8 +469,8 @@
 
         <hr />
 
-        <!-- ===== 第3章 ===== -->
-        <section>
+        <!-- ===== CATIA 三维建模方法 ===== -->
+        <section id="modeling-method">
             <h2>CATIA 三维建模方法</h2>
 
             <p>确定设计参数后，可在 CATIA 草图中创建多个控制点。如图4所示，线段长度通过方程 (1) 约束其角度。参数为表1中的齿轮2。等式的约束可通过 CATIA 中的 <strong>“公式”</strong> 命令实现。在本例中，控制点每隔 5° 计算一次。由于椭圆齿轮的对称性，只需第一和第二象限的控制点。通过 <strong>“样条线”</strong> 命令连接控制点，可生成近似的节曲线。增加控制点数量有助于提高曲线精度。</p>
@@ -499,7 +505,7 @@
         <hr />
 
         <!-- ===== 结论 ===== -->
-        <section>
+        <section id="conclusion">
             <h2>结论</h2>
             <p>本文重点介绍了椭圆齿轮副的设计方法。给出了椭圆齿轮副的设计参数，以及无需二次开发即可确定这些参数的常见设计流程。最后，通过数值示例，详细介绍了生成椭圆齿轮三维数学模型的逐步方法。该三维建模方法可帮助工程师方便地进行椭圆齿轮的 CAD 工作，并为椭圆齿轮的广泛应用提供便利。</p>
         </section>
@@ -507,7 +513,7 @@
         <hr />
 
         <!-- ===== 参考文献 ===== -->
-        <section>
+        <section id="references">
             <h2>参考文献</h2>
             <ol class="ref-list">
                 <li>Sen S, Parayil P. Design Methodology of an Automotive HVAC Mechanism and Its Numerical Validation Using Multibody Simulation[R]. SAE Technical Paper, 2016. <a href="https://doi.org/10.4271/2016-01-0450" target="_blank">https://doi.org/10.4271/2016-01-0450</a></li>
