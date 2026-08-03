@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>基于CATIA的椭圆齿轮副参数化设计 - 白尾 Sirotail</title>
+    <meta name="description" content="基于CATIA的椭圆齿轮副参数化设计——无需二次开发，仅用基础模块生成椭圆齿轮三维数学模型" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+        /* 文章内公式与表格样式 */
+        .formula-block {
+            margin: 16px 0;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 6px;
+            overflow-x: auto;
+            text-align: center;
+            font-size: 16px;
+        }
+        .formula-block math {
+            font-size: 16px;
+        }
+        .formula-label {
+            text-align: right;
+            font-weight: 500;
+            color: #4b5563;
+            margin-top: -8px;
+            margin-bottom: 16px;
+        }
+        .ref-list {
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        .ref-list li {
+            margin-bottom: 6px;
+        }
+        .ref-list a {
+            color: #2563eb;
+            word-break: break-all;
+        }
+        .keyword {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        /* 表格样式覆盖（与全局一致） */
+        .table-wrap table {
+            min-width: 400px;
+        }
+        .table-wrap td, .table-wrap th {
+            padding: 8px 20px;
+        }
+        .fig-caption {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: -12px;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 顶部导航 ===== -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="/">白尾 Sirotail</a>
+                <span class="logo-tag">工程师 · 画家</span>
+            </div>
+            <nav>
+                <a href="/" class="btn-home">🏠 首页</a>
+                <a href="/about.html">关于</a>
+                <a href="/contact.html">联系</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ===== 主内容 ===== -->
+    <main class="container">
+
+        <!-- 返回链接 -->
+        <p style="margin-bottom:16px;">
+            <a href="/" style="color:#6b7280;">← 返回文章列表</a>
+        </p>
+
+        <!-- 文章标题 -->
+        <h1>基于 CATIA 的椭圆齿轮副参数化设计</h1>
+        <p class="post-meta">📅 2026年8月3日 &nbsp;|&nbsp; 🏷️ 椭圆齿轮 · CATIA · 参数化设计 · 非圆齿轮</p>
+        <hr />
+
+        <!-- ===== 摘要 ===== -->
+        <section>
+            <h2>摘要</h2>
+            <p>针对椭圆齿轮副的应用需求，以及在缺乏二次开发能力的情况下，提出了一种生成椭圆齿轮三维数学模型的方法。该方法可在仅使用基础模块的 CAD 软件 CATIA 中实现。首先，给出了椭圆齿轮副的基本公式以及常见设计流程中的设计参数。其次，提供了一个数值实例，以实际方式展示设计输入与输出。最后，提出了一种逐步生成 CATIA 三维数学模型的方法。该方法可帮助工程师在工程实践中方便地应用椭圆齿轮副。</p>
+            <p><span class="keyword">关键词：</span>椭圆齿轮，节曲线，CAD，参数化设计，CATIA</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 引言 ===== -->
+        <section>
+            <h2>引言</h2>
+            <p>在汽车空调模块中，通常采用运动学连杆和连杆系统（即“机构”）来驱动风门 [1]。特别常见的是，空调模块中采用两个温度风门来调节温度，一个控制热风，另一个控制冷风。在传统机构设计中，采用多连杆或齿轮副来连接两个风门，并由一个执行器驱动。与传统设计不同，椭圆齿轮副具有可变传动比，在此应用中可以改善空调的温度线性度性能。</p>
+
+            <p>非圆齿轮理论经过多年发展 [2]。Litvin [3] 推导了非圆齿轮的广义节曲线，以及作为特例的椭圆齿轮节曲线。Chang 等 [4] 提出了数学模型和根切分析，有助于高精度椭圆齿轮的设计。此外，Bair [5] 提出了一种非标准椭圆齿轮传动的 CAD 方法，并编写计算机程序计算设计参数。随着 SolidWorks 和 CATIA 等软件在 CAD 中的广泛应用，椭圆齿轮的设计方法受到一些研究的关注。Hu 等 [6] 提出了一种基于 Visual Basic 6.0 作为 SolidWorks 二次开发工具的椭圆齿轮参数化设计方法。Yan 等 [7] 开发了一个利用 SolidWorks 二次开发生成共轭椭圆节曲线的设计系统。</p>
+
+            <p>然而，并非所有公司都具备 CATIA 和 SolidWorks 的二次开发能力，这制约了椭圆齿轮的广泛应用。本文专注于仅使用 CATIA 基础模块、无需计算机编程的椭圆齿轮参数化设计方法。文中给出了生成三维数学模型的数值示例。这将有助于工程师在无需二次开发的情况下，利用 CATIA 方便地设计椭圆齿轮。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第2章 ===== -->
+        <section>
+            <h2>椭圆齿轮的设计参数</h2>
+            <p>椭圆齿轮的节曲线可用极坐标表示为：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>r</mi>
+                    <mo>=</mo>
+                    <mfrac>
+                        <mrow>
+                            <mi>a</mi>
+                            <mo>(</mo>
+                            <mn>1</mn>
+                            <mo>−</mo>
+                            <msup><mi>e</mi><mn>2</mn></msup>
+                            <mo>)</mo>
+                        </mrow>
+                        <mrow>
+                            <mn>1</mn>
+                            <mo>+</mo>
+                            <mi>e</mi>
+                            <mo>cos</mo>
+                            <mo>(</mo>
+                            <mi>n</mi>
+                            <mi>φ</mi>
+                            <mo>)</mo>
+                        </mrow>
+                    </mfrac>
+                </math>
+            </div>
+            <div class="formula-label">(1)</div>
+
+            <p>其中，<i>r</i> 为节曲线半径，<i>φ</i> 为逆时针测量的角度，<i>a</i> 为椭圆长半轴，<i>e</i> 为偏心率，<i>n</i> = 1, 2, … 为椭圆阶数。图1 a) 展示了 <i>n</i> = 0 时，节曲线退化为标准圆。图1 b), c), d) 分别展示了 <i>n</i> = 1, 2, 3 时，椭圆节曲线的形状。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图1：不同阶数 <i>n</i> 下的椭圆形态（待绘制）</p>
+            </div>
+
+            <p>利用方程 (1)，可以在 CATIA 草图中使用 <strong>“样条线”</strong> 工具，通过设置一系列不同 <i>φ</i> 和 <i>r</i> 的控制点来获得节曲线。然而，在常见设计方法中，设计参数为模数 <i>m</i> 和齿数 <i>z</i>，而非长半轴 <i>a</i>。其中 <i>m</i> 为齿轮模数，<i>z</i> 为齿数。</p>
+
+            <p>模数和齿数应满足如下方程：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>C</mi>
+                    <mo>=</mo>
+                    <mi>π</mi>
+                    <mi>m</mi>
+                    <mi>z</mi>
+                </math>
+            </div>
+            <div class="formula-label">(2)</div>
+
+            <p>其中 <i>C</i> 为节曲线的弧长，可按下述方法求得。</p>
+
+            <p>首先，将节曲线方程写成笛卡尔坐标系形式：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mrow>
+                        <mo>{</mo>
+                        <mtable columnalign="left">
+                            <mtr><mtd><mi>x</mi><mo>(</mo><mi>φ</mi><mo>)</mo></mtd></mtr>
+                            <mtr><mtd><mi>y</mi><mo>(</mo><mi>φ</mi><mo>)</mo></mtd></mtr>
+                        </mtable>
+                        <mo>}</mo>
+                        <mo>=</mo>
+                        <mo>{</mo>
+                        <mtable columnalign="left">
+                            <mtr>
+                                <mtd>
+                                    <mfrac>
+                                        <mrow>
+                                            <mi>a</mi>
+                                            <mo>(</mo>
+                                            <mn>1</mn>
+                                            <mo>−</mo>
+                                            <msup><mi>e</mi><mn>2</mn></msup>
+                                            <mo>)</mo>
+                                            <mo>cos</mo>
+                                            <mi>φ</mi>
+                                        </mrow>
+                                        <mrow>
+                                            <mn>1</mn>
+                                            <mo>−</mo>
+                                            <mi>e</mi>
+                                            <mo>cos</mo>
+                                            <mo>(</mo>
+                                            <mi>n</mi>
+                                            <mi>φ</mi>
+                                            <mo>)</mo>
+                                        </mrow>
+                                    </mfrac>
+                                </mtd>
+                            </mtr>
+                            <mtr>
+                                <mtd>
+                                    <mfrac>
+                                        <mrow>
+                                            <mi>a</mi>
+                                            <mo>(</mo>
+                                            <mn>1</mn>
+                                            <mo>−</mo>
+                                            <msup><mi>e</mi><mn>2</mn></msup>
+                                            <mo>)</mo>
+                                            <mo>sin</mo>
+                                            <mi>φ</mi>
+                                        </mrow>
+                                        <mrow>
+                                            <mn>1</mn>
+                                            <mo>−</mo>
+                                            <mi>e</mi>
+                                            <mo>cos</mo>
+                                            <mo>(</mo>
+                                            <mi>n</mi>
+                                            <mi>φ</mi>
+                                            <mo>)</mo>
+                                        </mrow>
+                                    </mfrac>
+                                </mtd>
+                            </mtr>
+                        </mtable>
+                        <mo>}</mo>
+                    </mrow>
+                </math>
+            </div>
+            <div class="formula-label">(3)</div>
+
+            <p>其次，通过积分计算弧长：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>C</mi>
+                    <mo>=</mo>
+                    <msubsup>
+                        <mo>∫</mo>
+                        <mn>0</mn>
+                        <mrow><mn>2</mn><mi>π</mi></mrow>
+                    </msubsup>
+                    <msqrt>
+                        <msup>
+                            <mrow>
+                                <mo>(</mo>
+                                <mover><mi>x</mi><mo>˙</mo></mover>
+                                <mo>(</mo>
+                                <mi>φ</mi>
+                                <mo>)</mo>
+                                <mo>)</mo>
+                            </mrow>
+                            <mn>2</mn>
+                        </msup>
+                        <mo>+</mo>
+                        <msup>
+                            <mrow>
+                                <mo>(</mo>
+                                <mover><mi>y</mi><mo>˙</mo></mover>
+                                <mo>(</mo>
+                                <mi>φ</mi>
+                                <mo>)</mo>
+                                <mo>)</mo>
+                            </mrow>
+                            <mn>2</mn>
+                        </msup>
+                    </msqrt>
+                    <mi>d</mi>
+                    <mi>φ</mi>
+                </math>
+            </div>
+            <div class="formula-label">(4)</div>
+
+            <p>最后，简化积分后，弧长 <i>C</i> 可表示为：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>C</mi>
+                    <mo>=</mo>
+                    <mi>a</mi>
+                    <mo>(</mo>
+                    <mn>1</mn>
+                    <mo>−</mo>
+                    <msup><mi>e</mi><mn>2</mn></msup>
+                    <mo>)</mo>
+                    <msubsup>
+                        <mo>∫</mo>
+                        <mn>0</mn>
+                        <mrow><mn>2</mn><mi>π</mi></mrow>
+                    </msubsup>
+                    <mfrac>
+                        <mrow>
+                            <msup>
+                                <mrow>
+                                    <mo>[</mo>
+                                    <mo>(</mo>
+                                    <mn>1</mn>
+                                    <mo>−</mo>
+                                    <mi>e</mi>
+                                    <mo>cos</mo>
+                                    <mi>n</mi>
+                                    <mi>φ</mi>
+                                    <msup>
+                                        <mo>)</mo>
+                                        <mn>2</mn>
+                                    </msup>
+                                    <mo>+</mo>
+                                    <msup><mi>n</mi><mn>2</mn></msup>
+                                    <msup><mi>e</mi><mn>2</mn></msup>
+                                    <msup><mi>sin</mi><mn>2</mn></msup>
+                                    <mi>n</mi>
+                                    <mi>φ</mi>
+                                    <mo>]</mo>
+                                </mrow>
+                                <mrow><mn>1</mn><mo>/</mo><mn>2</mn></mrow>
+                            </msup>
+                        </mrow>
+                        <mrow>
+                            <mo>(</mo>
+                            <mn>1</mn>
+                            <mo>−</mo>
+                            <mi>e</mi>
+                            <mo>cos</mo>
+                            <mi>n</mi>
+                            <mi>φ</mi>
+                            <msup>
+                                <mo>)</mo>
+                                <mn>2</mn>
+                            </msup>
+                        </mrow>
+                    </mfrac>
+                    <mi>d</mi>
+                    <mi>φ</mi>
+                </math>
+            </div>
+            <div class="formula-label">(5)</div>
+
+            <p>该积分无法解析求解，但可通过计算机编程或甚至 Excel 公式进行足够精度的数值近似。图2展示了利用黎曼和近似弧长的 Excel 方法，其中 Δ<i>φ</i> = 0.001。输入参数为模数 <i>m</i>、齿数 <i>z</i>、偏心率 <i>e</i> 和阶数 <i>n</i>。弧长 <i>C</i> 可通过方程 (5) 的黎曼和近似得到，长半轴 <i>a</i> 可由方程 (2) 计算得出。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图2：黎曼和近似弧长确定设计参数（待绘制）</p>
+            </div>
+
+            <hr style="margin: 32px 0;" />
+
+            <p>考虑一个椭圆齿轮，其长半轴为 <i>a</i><sub>1</sub>，偏心率为 <i>e</i><sub>1</sub>，阶数为 <i>n</i><sub>1</sub>。设计椭圆齿轮副需要共轭节曲线。给定共轭节曲线的阶数 <i>n</i><sub>2</sub> 作为输入参数，其余参数可按如下方式确定。以下方程简化自 Yan [8] 的研究。</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <msub><mi>a</mi><mn>2</mn></msub>
+                    <mo>=</mo>
+                    <msub><mi>a</mi><mn>1</mn></msub>
+                    <msqrt>
+                        <msup><mi>n</mi><mn>2</mn></msup>
+                        <mo>−</mo>
+                        <msup><msub><mi>e</mi><mn>1</mn></msub><mn>2</mn></msup>
+                        <mo>(</mo>
+                        <msup><mi>n</mi><mn>2</mn></msup>
+                        <mo>−</mo>
+                        <mn>1</mn>
+                        <mo>)</mo>
+                    </msqrt>
+                </math>
+            </div>
+            <div class="formula-label">(6)</div>
+
+            <div class="formula-block">
+                <math display="block">
+                    <msub><mi>e</mi><mn>2</mn></msub>
+                    <mo>=</mo>
+                    <mfrac>
+                        <msub><mi>e</mi><mn>1</mn></msub>
+                        <msqrt>
+                            <msup><mi>n</mi><mn>2</mn></msup>
+                            <mo>−</mo>
+                            <msup><msub><mi>e</mi><mn>1</mn></msub><mn>2</mn></msup>
+                            <mo>(</mo>
+                            <msup><mi>n</mi><mn>2</mn></msup>
+                            <mo>−</mo>
+                            <mn>1</mn>
+                            <mo>)</mo>
+                        </msqrt>
+                    </mfrac>
+                </math>
+            </div>
+            <div class="formula-label">(7)</div>
+
+            <p>其中 <i>n</i> 定义为：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>n</mi>
+                    <mo>=</mo>
+                    <mfrac>
+                        <msub><mi>n</mi><mn>2</mn></msub>
+                        <msub><mi>n</mi><mn>1</mn></msub>
+                    </mfrac>
+                </math>
+            </div>
+            <div class="formula-label">(8)</div>
+
+            <p>此外，两回转中心距可按下式获得：</p>
+
+            <div class="formula-block">
+                <math display="block">
+                    <mi>A</mi>
+                    <mo>=</mo>
+                    <msub><mi>a</mi><mn>1</mn></msub>
+                    <mo>[</mo>
+                    <mn>1</mn>
+                    <mo>+</mo>
+                    <msqrt>
+                        <msup><mi>n</mi><mn>2</mn></msup>
+                        <mo>−</mo>
+                        <msup><msub><mi>e</mi><mn>1</mn></msub><mn>2</mn></msup>
+                        <mo>(</mo>
+                        <msup><mi>n</mi><mn>2</mn></msup>
+                        <mo>−</mo>
+                        <mn>1</mn>
+                        <mo>)</mo>
+                    </msqrt>
+                    <mo>]</mo>
+                </math>
+            </div>
+            <div class="formula-label">(9)</div>
+
+            <p>根据设计参数，共轭齿轮的节曲线可由方程 (1) 得到，齿数可由方程 (2)、(5) 计算。</p>
+
+            <p>图3 a) ~ d) 给出了 <i>n</i> 为不同数值时符合啮合条件的共轭节曲线。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图3：不同 <i>n</i> 值下符合啮合条件的共轭节曲线（待绘制）</p>
+            </div>
+
+            <p>表1给出了设计参数的数值示例。输入设计参数为 <i>m</i>、<i>z</i><sub>1</sub>、<i>e</i><sub>1</sub>、<i>n</i><sub>1</sub>、<i>n</i><sub>2</sub>。参数 <i>a</i><sub>1</sub>、<i>z</i><sub>2</sub>、<i>a</i><sub>2</sub>、<i>e</i><sub>2</sub> 由上述方程计算得出。下一章将利用表中的参数提出三维建模方法。</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th></th><th><i>m</i></th><th><i>z</i></th><th><i>a</i></th><th><i>e</i></th><th><i>n</i></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>齿轮1</strong></td><td>1.5</td><td>21</td><td>16.116</td><td>0.3</td><td>1</td></tr>
+                        <tr><td><strong>齿轮2</strong></td><td>1.5</td><td>63</td><td>46.376</td><td>0.1043</td><td>3</td></tr>
+                    </tbody>
+                </table>
+                <p style="text-align:center; color:#6b7280; font-size:14px; margin-top:8px;"><strong>表1</strong> 椭圆齿轮副数值示例</p>
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第3章 ===== -->
+        <section>
+            <h2>CATIA 三维建模方法</h2>
+
+            <p>确定设计参数后，可在 CATIA 草图中创建多个控制点。如图4所示，线段长度通过方程 (1) 约束其角度。参数为表1中的齿轮2。等式的约束可通过 CATIA 中的 <strong>“公式”</strong> 命令实现。在本例中，控制点每隔 5° 计算一次。由于椭圆齿轮的对称性，只需第一和第二象限的控制点。通过 <strong>“样条线”</strong> 命令连接控制点，可生成近似的节曲线。增加控制点数量有助于提高曲线精度。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图4：每5°约束的控制点（待绘制）</p>
+            </div>
+
+            <p>每个齿的位置可通过草图中的 <strong>“等距点”</strong> 命令找到，齿数作为输入变量。图5展示了椭圆节曲线被等弧长分为63个点的示例。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图5：节曲线按等弧长均分为63个点（待绘制）</p>
+            </div>
+
+            <p>椭圆齿轮的齿廓为渐开线，通常通过模拟齿条刀具的纯滚动方法获得 [9]。该方法在无二次开发的 CATIA 中过于复杂。因此，本文采用替代方法。其理论由 Litvin [10] 论证。如图6所示，椭圆齿轮的齿廓可用圆齿轮的齿替代，该圆齿轮的分度圆半径等于椭圆上该点的曲率半径。圆齿轮的齿廓为圆的渐开线，可方便地在 CATIA 草图中绘制。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图6：椭圆齿轮上的齿廓由在位置点处与椭圆相切的圆齿轮齿替代（待绘制）</p>
+            </div>
+
+            <p>将所有轮齿替换为相应的圆齿轮齿后，即可最终生成椭圆齿轮的齿廓。图7显示了在 CATIA 中生成完整的三维数学模型。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                <p>📊 图7：椭圆齿轮三维数学模型（待绘制）</p>
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 结论 ===== -->
+        <section>
+            <h2>结论</h2>
+            <p>本文重点介绍了椭圆齿轮副的设计方法。给出了椭圆齿轮副的设计参数，以及无需二次开发即可确定这些参数的常见设计流程。最后，通过数值示例，详细介绍了生成椭圆齿轮三维数学模型的逐步方法。该三维建模方法可帮助工程师方便地进行椭圆齿轮的 CAD 工作，并为椭圆齿轮的广泛应用提供便利。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 参考文献 ===== -->
+        <section>
+            <h2>参考文献</h2>
+            <ol class="ref-list">
+                <li>Sen S, Parayil P. Design Methodology of an Automotive HVAC Mechanism and Its Numerical Validation Using Multibody Simulation[R]. SAE Technical Paper, 2016. <a href="https://doi.org/10.4271/2016-01-0450" target="_blank">https://doi.org/10.4271/2016-01-0450</a></li>
+                <li>Hu C B, Tian F Y, Jiang Y C. Elliptical gears parametric design and motion simulation[J]. Advanced Materials Research, 2010, 139: 1206-1210. <a href="https://doi.org/10.4028/www.scientific.net/amr.139-141.1206" target="_blank">https://doi.org/10.4028/www.scientific.net/amr.139-141.1206</a></li>
+                <li>Litvin F L, Fuentes A. Gear geometry and applied theory[M]. Cambridge university press, 2004: 322-330; 344.</li>
+                <li>Chang S L, Tsay C B, Wu L I. Mathematical model and undercutting analysis of elliptical gears generated by rack cutters[J]. Mechanism and Machine Theory, 1996, 31(7): 879-890. <a href="https://doi.org/10.1016/0094-114X(95)00121-E" target="_blank">https://doi.org/10.1016/0094-114X(95)00121-E</a></li>
+                <li>Bair B W. Computer aided design of non-standard elliptical gear drives[J]. Proceedings of the Institution of Mechanical Engineers, Part C: Journal of Mechanical Engineering Science, 2001, 216(4): 473-482. <a href="https://doi.org/10.1243/0954406021525250" target="_blank">https://doi.org/10.1243/0954406021525250</a></li>
+                <li>Yan Z C, Guan D Z, Chen Y, Wei D S. Design System of the High Order Elliptic Gear Pair Pitch Curve based on the SolidWorks[J]. Journal of Mechanical Transmission, 41(1): 169-172. <a href="https://doi.org/10.16578/j.issn.1004.2539.2017.01.036" target="_blank">https://doi.org/10.16578/j.issn.1004.2539.2017.01.036</a></li>
+                <li>Yazar M. Design, manufacturing and operational analysis of elliptical gears[J]. International Journal of Precision Engineering and Manufacturing, 2021, 22(8): 1441-1451. <a href="https://doi.org/10.1007/s12541-021-00549-3" target="_blank">https://doi.org/10.1007/s12541-021-00549-3</a></li>
+            </ol>
+        </section>
+
+        <hr />
+
+        <!-- ===== 文章底部导航 ===== -->
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+            <a href="/" style="color:#6b7280;">← 返回文章列表</a>
+            <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" style="color:#6b7280;">↑ 回到顶部</a>
+        </div>
+
+    </main>
+
+    <!-- ===== 底部 ===== -->
+    <footer>
+        <div class="container">
+            <p>© 2026 白尾 Sirotail &nbsp;|&nbsp; 工程师 · 画家</p>
+            <p style="font-size:13px; margin-top:8px;">
+                <a href="/about.html">关于我们</a> &nbsp;·&nbsp;
+                <a href="/privacy.html">隐私政策</a> &nbsp;·&nbsp;
+                <a href="/contact.html">联系方式</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
