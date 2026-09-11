@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>白尾 Sirotail | 汽车空调4区独立风量控制</title>
+    <meta name="description" content="汽车空调箱的4温区、4模式与4区独立风量控制——基于物理模型的开环前馈策略" />
+    <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+    <!-- ==================== 顶部导航 ==================== -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="../index.html">白尾 Sirotail</a>
+                <span class="logo-tag">工程师 · 艺术家</span>
+            </div>
+            <nav>
+                <a href="../index.html" class="btn-home">🏠 首页</a>
+                <a href="#section1">1. 4温区</a>
+                <a href="#section2">2. 4模式</a>
+                <a href="#section3">3. 技术挑战</a>
+                <a href="#section4">4. 数学模型</a>
+                <a href="#section5">5. 标定策略</a>
+                <a href="#section6">6. 离线仿真</a>
+                <a href="#section7">7. 开环控制</a>
+                <a href="#section8">8. 总结</a>
+                <a href="../about.html">关于</a>
+                <a href="../contact.html">联系</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ==================== 主内容 ==================== -->
+    <main class="container">
+
+        <!-- 返回链接 -->
+        <a href="../index.html" class="back-link">← 返回文章列表</a>
+
+        <!-- 文章标题 -->
+        <h1>
+            汽车空调箱的4温区、4模式与4区独立风量控制
+            <small>—— 基于物理模型的开环前馈策略</small>
+        </h1>
+        <p class="post-meta">📅 2026年8月10日 &nbsp;|&nbsp; 🏷️ 四温区空调 · 风量解耦 · 物理模型</p>
+
+        <!-- ===== 引言 ===== -->
+        <section>
+            <h2>引言</h2>
+            <p>随着汽车消费升级，乘客对座舱舒适性的要求已从"能制冷制热"演进为"每个人都有自己的专属微气候"。四温区空调由此应运而生——前排左右各一区、后排左右各一区，四个座位可独立设定温度、出风模式和风量。</p>
+            <p>在这三项功能中，<strong>4温区</strong>和<strong>4模式</strong>的实现相对直接，真正的技术难点在于<strong>4区独立风量控制</strong>——如何在单一空调箱、单鼓风机的硬约束下，让四个区域的风量互不干扰地独立调节，同时还要应对模式切换带来的耦合扰动。本文将逐一拆解这三项功能的实现原理，重点探讨4区独立风量控制的<strong>物理数学模型</strong>、<strong>离线仿真求解方法</strong>与<strong>纯开环标定策略</strong>。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第1章 ===== -->
+        <section id="section1">
+            <h2>1. 4温区：风道分割 + 独立混风</h2>
+            <p>四温区的实现原理并不复杂，核心思路是将空调箱内部的风道"一分为四"。</p>
+            <p>具体来说，在HVAC（暖通空调）箱体内，通过物理隔板将空气流通通道分隔为左前、右前、左后、右后四个独立风道。每个风道都拥有自己的冷风道和热风道——冷风来自蒸发器，热风来自暖风芯体。在冷、热风道交汇的混风区，每个通道设置有独立的<strong>温度风门</strong>（通常由步进电机驱动），通过调节冷风和热风的混合比例，即可独立控制该区域的出风温度。</p>
+            <p>暖风芯体横置于四个热风道的整个通风截面上，确保每个区域都能获取热源。四温区本质上是将一套空调系统的冷热源"分配"给四个独立的风道，每个风道通过自己的混风风门独立调温。</p>
+            <p><strong>小结</strong>：4温区的实现是"并联分割"的逻辑——将一套系统分成四份独立控制，技术成熟，难度较低。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第2章 ===== -->
+        <section id="section2">
+            <h2>2. 4模式：多出风口独立风门的组合控制</h2>
+            <p>四温区空调的"模式"（吹面、吹脚、除霜、混合等），是由每个通道内各出风口风门的开闭组合决定的。</p>
+            <p>以左前通道为例，该区域设有<strong>左前除霜</strong>、<strong>左前吹面</strong>、<strong>左前吹脚</strong>三个出风口，每个出风口均由独立的执行器驱动风门进行比例开关控制。左后通道则设有<strong>左后吹面</strong>、<strong>左后吹脚</strong>两个出风口，同样独立控制。</p>
+            <p>所谓"吹面模式"，本质上是将吹面风门打开、吹脚风门和除霜风门关闭（或维持极小开度）；"吹脚模式"则反之。混合模式则是让多个出口同时以特定比例开启。</p>
+            <p>与传统的单区或双区空调不同，四温区空调的<strong>每个通道可以独立选择自己的出风模式</strong>——驾驶员可以设为吹面，副驾可以设为吹脚，后排左右亦可各自选择，互不干扰。</p>
+            <p><strong>小结</strong>：4模式的控制是各出风口风门执行器的位置组合逻辑，只要硬件上每个出风口配置了独立执行器，软件上定义好各模式的对应角度组合即可实现，难度同样较低。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第3章 ===== -->
+        <section id="section3">
+            <h2>3. 4区独立风量控制：真正的技术挑战</h2>
+            <p>如果说4温区和4模式是"分"的逻辑——把风道和风门分开即可独立控制，那么4区独立风量控制面临的则是一个深刻的物理矛盾：</p>
+            <p><strong>四个通道共享一个鼓风机，但每个通道的风量需求独立且动态变化。更关键的是，每个通道内出风口风门的角度，同时决定了该通道的"模式"和"风量"，而任一通道的风门角度变化，都会通过改变系统阻力影响其他三个通道的风量分配——这就是"模式-风量"耦合与"通道间"耦合的双重难题。</strong></p>
+
+            <h3>3.1 物理架构定义</h3>
+            <p>为便于数学描述，先明确系统的物理架构：</p>
+            <ul>
+                <li>系统包含4个独立气流通道，记作下标 <i>i</i> ∈ {LF, RF, LR, RR}（左前、右前、左后、右后）。</li>
+                <li><strong>左前（LF）</strong> 和 <strong>右前（RF）</strong> 通道各包含3个出风口：除霜（<i>d</i>）、吹面（<i>f</i>）、吹脚（<i>b</i>），每个出风口有独立风门执行器。</li>
+                <li><strong>左后（LR）</strong> 和 <strong>右后（RR）</strong> 通道各包含2个出风口：吹面（<i>f</i>）、吹脚（<i>b</i>），同样独立控制。</li>
+            </ul>
+            <p>全车共有 3+3+2+2 = 10 个出风口风门执行器，加上1个鼓风机，共11个执行器，却要同时满足4个通道的模式需求和4个通道的风量需求——这是一个典型的<strong>冗余驱动（Over-actuated）</strong>系统，需要数学模型来指导控制与标定。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                📊 图1：四温区空调物理架构示意图（待绘制）
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第4章 ===== -->
+        <section id="section4">
+            <h2>4. 物理数学模型：破解耦合的理论基础</h2>
+
+            <h3>4.1 单个出风口的工程节流模型</h3>
+            <p>对于任意一个出风口 <i>j</i>，气流在流经风门时，流通截面积急剧收缩，产生局部阻力损失。从流体力学的<b>扩展伯努利方程（含局部阻力损失项）</b>出发：</p>
+
+            <p><b>（1）完整理论模型</b></p>
+            <div class="formula-box">
+                <math display="block">
+                    <mi>Δ</mi><mi>P</mi>
+                    <mo>=</mo>
+                    <mi>ζ</mi>
+                    <mo>&#x22C5;</mo>
+                    <mfrac><mn>1</mn><mn>2</mn></mfrac>
+                    <mi>ρ</mi>
+                    <msubsup><mi>v</mi><mrow><mi>o</mi><mi>r</mi><mi>i</mi><mi>f</mi><mi>i</mi><mi>c</mi><mi>e</mi></mrow><mn>2</mn></msubsup>
+                    <mo>+</mo>
+                    <mfenced>
+                        <mrow>
+                            <mfrac><mn>1</mn><mn>2</mn></mfrac>
+                            <mi>ρ</mi>
+                            <msubsup><mi>v</mi><mn>2</mn><mn>2</mn></msubsup>
+                            <mo>&#x2212;</mo>
+                            <mfrac><mn>1</mn><mn>2</mn></mfrac>
+                            <mi>ρ</mi>
+                            <msubsup><mi>v</mi><mn>1</mn><mn>2</mn></msubsup>
+                        </mrow>
+                    </mfenced>
+                </math>
+            </div>
+            <p>其中 <i>v</i><sub>1</sub> 为风门上游来流速度（<b>不可忽略</b>），<i>v</i><sub>2</sub> 为下游出口流速，<i>v</i><sub>orifice</sub> 为缩脉处特征流速。</p>
+
+            <p><b>（2）工程等效简化</b></p>
+            <p>定义等效流导 <i>K</i><sub><i>i</i>,<i>j</i></sub>（集总参数，单位 m²，内含流量系数与上下游速度修正）：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>K</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub>
+                    <mo>(</mo>
+                    <mi>θ</mi>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <msub><mi>C</mi><mi>d</mi></msub>
+                    <mo>&#x22C5;</mo>
+                    <msqrt><mn>2</mn></msqrt>
+                    <mo>&#x22C5;</mo>
+                    <mi>f</mi>
+                    <mo>(</mo>
+                    <mi>θ</mi>
+                    <mo>)</mo>
+                    <mo>&#x22C5;</mo>
+                    <msub><mi>A</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub>
+                </math>
+            </div>
+            <p>最终工程简化公式（标准节流公式）：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>q</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub>
+                    <mo>=</mo>
+                    <msub><mi>K</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub>
+                    <mo>(</mo>
+                    <mi>θ</mi>
+                    <mo>)</mo>
+                    <mo>&#x22C5;</mo>
+                    <msqrt>
+                        <mfrac>
+                            <mi>Δ</mi><mi>P</mi>
+                            <mi>ρ</mi>
+                        </mfrac>
+                    </msqrt>
+                </math>
+            </div>
+            <p>其中 <math><msqrt><mi>Δ</mi><mi>P</mi><mo>/</mo><mi>ρ</mi></msqrt></math> 量纲为 m/s，代表驱动气流的<b>特征速度</b>。</p>
+
+            <h3>4.2 单通道集总模型</h3>
+            <p>同一通道内多个出风口并联，共享入口静压 <i>P</i><sub><i>i</i></sub>。通道总流量：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>Q</mi><mi>i</mi></msub>
+                    <mo>=</mo>
+                    <mfenced>
+                        <munder><mo>&#x2211;</mo><mi>j</mi></munder>
+                        <msub><mi>K</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub>
+                    </mfenced>
+                    <mo>&#x22C5;</mo>
+                    <msqrt>
+                        <mfrac>
+                            <msub><mi>P</mi><mi>i</mi></msub>
+                            <mi>ρ</mi>
+                        </mfrac>
+                    </msqrt>
+                </math>
+            </div>
+            <p>定义通道等效总流导 <i>C</i><sub><i>i</i></sub> = <math><munder><mo>&#x2211;</mo><mi>j</mi></munder><msub><mi>K</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub></math>。</p>
+
+            <h3>4.3 四通道并联分流公式</h3>
+            <p>四个通道并联于鼓风机出口，共享同一静压 <i>P</i><sub>fan</sub>。由流量守恒和压力平衡，消去公共因子后得到核心公式：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>Q</mi><mi>i</mi></msub>
+                    <mo>=</mo>
+                    <mfrac>
+                        <msub><mi>C</mi><mi>i</mi></msub>
+                        <munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mn>4</mn></munderover>
+                        <msub><mi>C</mi><mi>k</mi></msub>
+                    </mfrac>
+                    <mo>&#x22C5;</mo>
+                    <msub><mi>Q</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi></mrow></msub>
+                </math>
+            </div>
+
+            <h3>4.4 耦合本质</h3>
+            <p>任一通道流导 <i>C</i><sub><i>i</i></sub> 改变时，分子与分母同步变化，导致<b>所有通道风量全局重置</b>——这是"牵一发而动全身"的数学根源。</p>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第5章 ===== -->
+        <section id="section5">
+            <h2>5. 利用数学模型指导标定</h2>
+
+            <h3>5.1 传统标定的困境</h3>
+            <p>传统遍历法需要实测的工况组合数：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <mo>(</mo>
+                    <mn>4</mn>
+                    <mtext>&#x79CD;&#x6A21;&#x5F0F;</mtext>
+                    <msup>
+                        <mo>)</mo>
+                        <mn>4</mn>
+                    </msup>
+                    <mo>&#x00D7;</mo>
+                    <mo>(</mo>
+                    <mn>7</mn>
+                    <mtext>&#x6863;&#x98CE;&#x91CF;</mtext>
+                    <msup>
+                        <mo>)</mo>
+                        <mn>4</mn>
+                    </msup>
+                    <mo>&#x2248;</mo>
+                    <mn>61.5</mn>
+                    <mtext>&#x4E07;&#x7EC4;</mtext>
+                </math>
+            </div>
+
+            <h3>5.2 基于模型的标定策略</h3>
+            <p><b>第一层：单出风口流导特性标定</b></p>
+            <p>在台架上单独驱动每个风门，采集10~15个角度点的流量数据，拟合流导曲线 <i>K</i><sub><i>i</i>,<i>j</i></sub> = <i>f</i><sub><i>i</i>,<i>j</i></sub>(<i>θ</i><sub><i>i</i>,<i>j</i></sub>)。全车仅10个执行器，约100~150个数据点，耗时<b>2~3天</b>。</p>
+
+            <p><b>第二层：模式约束数学化</b></p>
+            <p>以左前"纯吹面"为例：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>θ</mi><mrow><mi>L</mi><mi>F</mi><mo>,</mo><mi>d</mi><mi>e</mi><mi>f</mi></mrow></msub>
+                    <mo>=</mo>
+                    <msub><mi>θ</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub>
+                    <mtext>,&#xA0;&#xA0;</mtext>
+                    <msub><mi>θ</mi><mrow><mi>L</mi><mi>F</mi><mo>,</mo><mi>f</mi><mi>o</mi><mi>o</mi><mi>t</mi></mrow></msub>
+                    <mo>=</mo>
+                    <msub><mi>θ</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub>
+                    <mtext>,&#xA0;&#xA0;</mtext>
+                    <msub><mi>θ</mi><mrow><mi>L</mi><mi>F</mi><mo>,</mo><mi>f</mi><mi>a</mi><mi>c</mi><mi>e</mi></mrow></msub>
+                    <mo>&#x2208;</mo>
+                    <mo>[</mo>
+                    <msub><mi>θ</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub>
+                    <mo>,</mo>
+                    <msub><mi>θ</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub>
+                    <mo>]</mo>
+                </math>
+            </div>
+            <blockquote>
+                <p><b>模式一旦确定，风量控制简化为单一变量（主风门开度）的单调调节问题。</b></p>
+            </blockquote>
+
+            <p><b>第三层：离线枚举仿真</b></p>
+            <p>在计算机上枚举全部 61.5 万组工况，代入数学模型求解，生成前馈查询表（LUT）。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                📊 图2：标定流程对比（传统 vs 基于模型）（待绘制）
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第6章 ===== -->
+        <section id="section6">
+            <h2>6. 离线枚举仿真的求解方法</h2>
+
+            <h3>6.1 降维策略："模式联动缩放"</h3>
+            <p>同一通道内，模式固定各出口面积比例。将同通道内所有风门绑定为1个虚拟执行器，缩放系数 <i>&alpha;</i><sub><i>i</i></sub> 代表通道整体开度。<b>控制变量从10个降为4个</b>，问题适定。</p>
+
+            <h3>6.2 状态变量与目标方程组</h3>
+            <p>状态变量：<i>X</i> = [<i>&alpha;</i><sub>1</sub>, <i>&alpha;</i><sub>2</sub>, <i>&alpha;</i><sub>3</sub>, <i>&alpha;</i><sub>4</sub>]<sup>T</sup></p>
+            <p>残差函数（通道 <i>i</i> 风量比例误差）：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>F</mi><mi>i</mi></msub>
+                    <mo>(</mo>
+                    <mi>X</mi>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mfrac>
+                        <msub><mi>C</mi><mi>i</mi></msub>
+                        <mo>(</mo>
+                        <msub><mi>α</mi><mi>i</mi></msub>
+                        <mo>)</mo>
+                        <munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mn>4</mn></munderover>
+                        <msub><mi>C</mi><mi>k</mi></msub>
+                        <mo>(</mo>
+                        <msub><mi>α</mi><mi>k</mi></msub>
+                        <mo>)</mo>
+                    </mfrac>
+                    <mo>&#x2212;</mo>
+                    <msub><mi>R</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi><mi>g</mi><mi>t</mi></mrow></msub>
+                </math>
+            </div>
+
+            <h3>6.3 牛顿-拉弗森迭代求解</h3>
+            <p>构建 4&times;4 雅可比矩阵 <i>J</i>（数值差分法求偏导），迭代公式：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <mi>J</mi>
+                    <mo>&#x22C5;</mo>
+                    <mi>Δ</mi>
+                    <mi>X</mi>
+                    <mo>=</mo>
+                    <mo>&#x2212;</mo>
+                    <mi>F</mi>
+                    <mo>(</mo>
+                    <msub><mi>X</mi><mi>n</mi></msub>
+                    <mo>)</mo>
+                    <mtext>,&#xA0;&#xA0;&#xA0;</mtext>
+                    <msub><mi>X</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msub>
+                    <mo>=</mo>
+                    <msub><mi>X</mi><mi>n</mi></msub>
+                    <mo>+</mo>
+                    <mi>Δ</mi>
+                    <mi>X</mi>
+                </math>
+            </div>
+            <p>牛顿法二阶收敛，通常 <b>4~6 次迭代</b>即可收敛。初值取全开（<i>&alpha;</i><sub><i>i</i></sub> = 1），保证全局收敛。</p>
+
+            <h3>6.4 双重枚举循环</h3>
+            <ul>
+                <li><b>外层</b>：256种模式组合（4<sup>4</sup>）</li>
+                <li><b>内层</b>：2401种风量组合（7<sup>4</sup>）</li>
+                <li><b>总计</b>：61.5万组，纯数学计算，数小时完成</li>
+            </ul>
+
+            <h3>6.5 反向映射与鼓风机匹配</h3>
+            <p>由 <i>&alpha;</i><sub><i>i</i></sub> 反算各风门物理角度：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>θ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub>
+                    <mo>=</mo>
+                    <msubsup><mi>f</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msubsup>
+                    <mo>(</mo>
+                    <msub><mi>α</mi><mi>i</mi></msub>
+                    <mo>&#x22C5;</mo>
+                    <msub><mi>K</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub>
+                    <mo>)</mo>
+                </math>
+            </div>
+            <p>鼓风机需求静压：</p>
+            <div class="formula-box">
+                <math display="block">
+                    <msub><mi>P</mi><mrow><mi>f</mi><mi>a</mi><mi>n</mi><mo>_</mo><mi>n</mi><mi>e</mi><mi>e</mi><mi>d</mi></mrow></msub>
+                    <mo>=</mo>
+                    <mi>ρ</mi>
+                    <mo>&#x22C5;</mo>
+                    <msup>
+                        <mfenced>
+                            <mfrac>
+                                <msub><mi>Q</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi><mo>_</mo><mi>t</mi><mi>g</mi><mi>t</mi></mrow></msub>
+                                <msub><mi>C</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi></mrow></msub>
+                            </mfrac>
+                        </mfenced>
+                        <mn>2</mn>
+                    </msup>
+                </math>
+            </div>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                📊 图3：迭代求解收敛曲线（待绘制）
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第7章 ===== -->
+        <section id="section7">
+            <h2>7. 为什么可以使用开环控制？</h2>
+
+            <h3>7.1 风量是乘客感受，不是精密物理量</h3>
+            <p>相邻风量档位差异需让乘客主观感知明显（通常要求 > 15%），同一档位下偏差不超过 ±15% 乘客不会察觉。±15% 的宽容度为开环控制提供了天然余量。</p>
+
+            <h3>7.2 开环控制的工程优势</h3>
+            <ul>
+                <li><b>响应速度</b>：10ms内同步输出，无过渡震荡</li>
+                <li><b>成本与可靠性</b>：无传感器，BOM降低200~300元，故障率更低</li>
+                <li><b>标定简化</b>：生产环节无需逐台校准</li>
+            </ul>
+
+            <h3>7.3 生产公差处理</h3>
+            <p>EOL环节执行全行程扫描，测量实际风量与理论值对比，计算个体偏差修正系数写入EEPROM。全生命周期无需重新校准。</p>
+
+            <!-- 图片占位 -->
+            <div class="img-placeholder">
+                📊 图4：开环 vs 闭环响应对比（待绘制）
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- ===== 第8章 ===== -->
+        <section id="section8">
+            <h2>8. 标定工作量对比与结语</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>标定方式</th><th>需要实测的工况数</th><th>耗时</th><th>可复用性</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>传统遍历法</td><td>~61万组</td><td>数月</td><td>每车型重新标定</td></tr>
+                        <tr><td>基于模型法</td><td>~150个单风门数据点 + 计算机仿真</td><td>2~3天台架 + 数小时计算</td><td>基础曲线可跨车型复用</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="text-align:center;"><b>表 1</b> 标定工作量对比</p>
+
+            <p><strong>工作量减少超过三个数量级。</strong></p>
+
+            <p>四温区空调的"4温区"靠的是风道分割与独立混风，"4模式"靠的是多出风口独立风门的组合控制，而"4区独立风量控制"才是真正考验系统架构与工程方法的环节。</p>
+            <p>其核心挑战在于：<strong>10个出风口风门执行器共享1个鼓风机，任何风门角度变化都会全局影响四区风量分配</strong>。解决这一问题的正确路径，不是堆叠更多硬件（如增加传感器做闭环），而是建立精确的物理数学模型——从单出口流导特性到单通道集总流导，再到四通道并联分流公式——将复杂的多变量耦合问题转化为可控的数学求解问题。</p>
+            <p>基于该模型，标定工作从传统方法的61万组工况实测缩减为150个基础数据点的台架测试加上数小时的离线计算机仿真，减少超过三个数量级。而纯开环控制策略，则充分利用了"风量以乘客感受为准"这一天然宽容度，在保证主观舒适性的前提下，实现了最低成本、最高可靠性和最快响应速度。</p>
+            <p>对于工程师而言，理解这背后的物理约束与数学逻辑，比记住某个具体方案更为重要。毕竟，空调箱的本质始终是——<strong>如何把适量的空气，以正确的模式，送到该去的地方</strong>。而当物理模型接管了标定，工程师的角色也将从"反复试错的调参者"演进为"系统架构师与模型设计者"。</p>
+        </section>
+
+        <hr />
+
+        <!-- 文章底部导航 -->
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+            <a href="../index.html" style="color:#6b7280;">← 返回文章列表</a>
+            <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" style="color:#6b7280;">↑ 回到顶部</a>
+        </div>
+
+    </main>
+
+    <!-- ==================== 底部 ==================== -->
+    <footer>
+        <div class="container">
+            <p>© 2026 白尾 Sirotail &nbsp;|&nbsp; 工程师 · 艺术家</p>
+            <p style="font-size:13px; margin-top:6px;">
+                <a href="../about.html">关于我们</a> &nbsp;·&nbsp;
+                <a href="../privacy.html">隐私政策</a> &nbsp;·&nbsp;
+                <a href="../contact.html">联系方式</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

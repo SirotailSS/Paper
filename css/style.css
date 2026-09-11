@@ -140,6 +140,13 @@ h3 {
     color: #1e293b;
 }
 
+h4 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #334155;
+    margin: 20px 0 8px;
+}
+
 p {
     margin-bottom: 14px;
 }
@@ -153,6 +160,20 @@ li {
 
 strong {
     color: #0f172a;
+}
+
+/* ========================================
+   返回链接
+   ======================================== */
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #6b7280;
+}
+.back-link:hover {
+    color: #2563eb;
+    text-decoration: none;
 }
 
 /* ========================================
@@ -200,6 +221,19 @@ tr:nth-child(even) {
 }
 
 /* ========================================
+   公式块（MathML 居中显示）
+   ======================================== */
+.formula-box {
+    text-align: center;
+    margin: 16px 0 8px;
+    padding: 8px 0;
+    overflow-x: auto;
+}
+.formula-box math {
+    font-size: 15pt;
+}
+
+/* ========================================
    底部
    ======================================== */
 footer {
@@ -216,4 +250,33 @@ footer a {
 footer a:hover {
     color: #2563eb;
     text-decoration: none;
+}
+
+/* ========================================
+   文章图片与图注
+   ======================================== */
+.fig-block {
+    margin: 24px 0 32px;
+    text-align: center;
+}
+.fig-block img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.fig-block figcaption {
+    margin-top: 10px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   响应式：公式在小屏缩小
+   ======================================== */
+@media (max-width: 768px) {
+    .formula-box math {
+        font-size: 12pt;
+    }
 }
