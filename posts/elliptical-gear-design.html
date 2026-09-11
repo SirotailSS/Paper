@@ -50,12 +50,22 @@
         .table-wrap td, .table-wrap th {
             padding: 8px 20px;
         }
-        .fig-caption {
+        /* 图片与图注 */
+        .fig-block {
+            margin: 24px 0 32px;
             text-align: center;
+        }
+        .fig-block img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .fig-block figcaption {
+            margin-top: 10px;
             color: #6b7280;
             font-size: 14px;
-            margin-top: -12px;
-            margin-bottom: 24px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -151,10 +161,11 @@
 
             <p>其中，<i>r</i> 为节曲线半径，<i>φ</i> 为逆时针测量的角度，<i>a</i> 为椭圆长半轴，<i>e</i> 为偏心率，<i>n</i> = 1, 2, … 为椭圆阶数。图1 a) 展示了 <i>n</i> = 0 时，节曲线退化为标准圆。图1 b), c), d) 分别展示了 <i>n</i> = 1, 2, 3 时，椭圆节曲线的形状。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图1：不同阶数 <i>n</i> 下的椭圆形态（待绘制）</p>
-            </div>
+            <!-- 图1 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig1-ellipse-shapes.png" alt="不同阶数 n 下的椭圆形态" loading="lazy" />
+                <figcaption>图1 不同阶数 <i>n</i> 下的椭圆形态</figcaption>
+            </figure>
 
             <p>利用方程 (1)，可以在 CATIA 草图中使用 <strong>“样条线”</strong> 工具，通过设置一系列不同 <i>φ</i> 和 <i>r</i> 的控制点来获得节曲线。然而，在常见设计方法中，设计参数为模数 <i>m</i> 和齿数 <i>z</i>，而非长半轴 <i>a</i>。其中 <i>m</i> 为齿轮模数，<i>z</i> 为齿数。</p>
 
@@ -354,10 +365,11 @@
 
             <p>该积分无法解析求解，但可通过计算机编程或甚至 Excel 公式进行足够精度的数值近似。图2展示了利用黎曼和近似弧长的 Excel 方法，其中 Δ<i>φ</i> = 0.001。输入参数为模数 <i>m</i>、齿数 <i>z</i>、偏心率 <i>e</i> 和阶数 <i>n</i>。弧长 <i>C</i> 可通过方程 (5) 的黎曼和近似得到，长半轴 <i>a</i> 可由方程 (2) 计算得出。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图2：黎曼和近似弧长确定设计参数（待绘制）</p>
-            </div>
+            <!-- 图2 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig2-riemann-sum.png" alt="黎曼和近似弧长确定设计参数" loading="lazy" />
+                <figcaption>图2 黎曼和近似弧长确定设计参数</figcaption>
+            </figure>
 
             <hr style="margin: 32px 0;" />
 
@@ -446,10 +458,11 @@
 
             <p>图3 a) ~ d) 给出了 <i>n</i> 为不同数值时符合啮合条件的共轭节曲线。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图3：不同 <i>n</i> 值下符合啮合条件的共轭节曲线（待绘制）</p>
-            </div>
+            <!-- 图3 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig3-conjugate-pitch-curves.png" alt="不同 n 值下符合啮合条件的共轭节曲线" loading="lazy" />
+                <figcaption>图3 不同 <i>n</i> 值下符合啮合条件的共轭节曲线</figcaption>
+            </figure>
 
             <p>表1给出了设计参数的数值示例。输入设计参数为 <i>m</i>、<i>z</i><sub>1</sub>、<i>e</i><sub>1</sub>、<i>n</i><sub>1</sub>、<i>n</i><sub>2</sub>。参数 <i>a</i><sub>1</sub>、<i>z</i><sub>2</sub>、<i>a</i><sub>2</sub>、<i>e</i><sub>2</sub> 由上述方程计算得出。下一章将利用表中的参数提出三维建模方法。</p>
 
@@ -475,31 +488,35 @@
 
             <p>确定设计参数后，可在 CATIA 草图中创建多个控制点。如图4所示，线段长度通过方程 (1) 约束其角度。参数为表1中的齿轮2。等式的约束可通过 CATIA 中的 <strong>“公式”</strong> 命令实现。在本例中，控制点每隔 5° 计算一次。由于椭圆齿轮的对称性，只需第一和第二象限的控制点。通过 <strong>“样条线”</strong> 命令连接控制点，可生成近似的节曲线。增加控制点数量有助于提高曲线精度。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图4：每5°约束的控制点（待绘制）</p>
-            </div>
+            <!-- 图4 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig4-control-points-5deg.png" alt="每 5° 约束的控制点" loading="lazy" />
+                <figcaption>图4 每 5° 约束的控制点</figcaption>
+            </figure>
 
             <p>每个齿的位置可通过草图中的 <strong>“等距点”</strong> 命令找到，齿数作为输入变量。图5展示了椭圆节曲线被等弧长分为63个点的示例。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图5：节曲线按等弧长均分为63个点（待绘制）</p>
-            </div>
+            <!-- 图5 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig5-63-equidistant-points.png" alt="节曲线按等弧长均分为 63 个点" loading="lazy" />
+                <figcaption>图5 节曲线按等弧长均分为 63 个点</figcaption>
+            </figure>
 
             <p>椭圆齿轮的齿廓为渐开线，通常通过模拟齿条刀具的纯滚动方法获得 [9]。该方法在无二次开发的 CATIA 中过于复杂。因此，本文采用替代方法。其理论由 Litvin [10] 论证。如图6所示，椭圆齿轮的齿廓可用圆齿轮的齿替代，该圆齿轮的分度圆半径等于椭圆上该点的曲率半径。圆齿轮的齿廓为圆的渐开线，可方便地在 CATIA 草图中绘制。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图6：椭圆齿轮上的齿廓由在位置点处与椭圆相切的圆齿轮齿替代（待绘制）</p>
-            </div>
+            <!-- 图6 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig6-tooth-replacement.png" alt="椭圆齿轮上的齿廓由在位置点处与椭圆相切的圆齿轮齿替代" loading="lazy" />
+                <figcaption>图6 椭圆齿轮上的齿廓由在位置点处与椭圆相切的圆齿轮齿替代</figcaption>
+            </figure>
 
             <p>将所有轮齿替换为相应的圆齿轮齿后，即可最终生成椭圆齿轮的齿廓。图7显示了在 CATIA 中生成完整的三维数学模型。</p>
 
-            <!-- 图片占位 -->
-            <div class="img-placeholder">
-                <p>📊 图7：椭圆齿轮三维数学模型（待绘制）</p>
-            </div>
+            <!-- 图7 -->
+            <figure class="fig-block">
+                <img src="images/elliptical-gear/fig7-3d-model.png" alt="椭圆齿轮三维数学模型" loading="lazy" />
+                <figcaption>图7 椭圆齿轮三维数学模型</figcaption>
+            </figure>
         </section>
 
         <hr />
